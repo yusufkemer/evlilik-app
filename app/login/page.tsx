@@ -59,12 +59,7 @@ export default function LoginPage() {
           Giriş Yap
         </button>
 
-        <button
-          onClick={() => router.push("/register")}
-          className="w-full mt-4 bg-[#061122] border border-slate-700 hover:bg-slate-800 transition p-4 rounded-xl font-bold"
-        >
-          Hesap Oluştur
-        </button>
+
       </div>
     </main>
   );
