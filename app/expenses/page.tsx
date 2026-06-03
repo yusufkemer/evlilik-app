@@ -119,6 +119,7 @@ export default function ExpensesPage() {
 
   async function deleteExpense(id?: string) {
     if (!id) return;
+
     if (!confirm("Bu masrafı silmek istiyor musun?")) return;
 
     await deleteExpenseFromDB(id);
@@ -323,7 +324,9 @@ export default function ExpensesPage() {
                             Ödeme Durumu
                           </span>
 
-                          <span className="font-black text-lg">%{percent}</span>
+                          <span className="font-black text-lg">
+                            %{percent}
+                          </span>
                         </div>
 
                         <div className="w-full bg-slate-800 h-4 rounded-full overflow-hidden">
@@ -353,6 +356,38 @@ export default function ExpensesPage() {
                           color="text-red-400"
                         />
                       </div>
+
+                      {item.paymentHistory &&
+                        item.paymentHistory.length > 0 && (
+                          <div className="mt-6 bg-[#061122] border border-slate-700 rounded-xl p-5">
+                            <h4 className="text-xl font-black mb-4">
+                              Ödeme Geçmişi
+                            </h4>
+
+                            <div className="space-y-3">
+                              {item.paymentHistory.map(
+                                (payment, index) => (
+                                  <div
+                                    key={index}
+                                    className="flex justify-between gap-4 border-b border-slate-800 pb-3 last:border-b-0 last:pb-0"
+                                  >
+                                    <span className="text-slate-400">
+                                      {payment.date}
+                                    </span>
+
+                                    <span className="text-green-400 font-bold">
+                                      +{" "}
+                                      {payment.amount.toLocaleString(
+                                        "tr-TR"
+                                      )}{" "}
+                                      ₺
+                                    </span>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
                     </div>
                   );
                 })}
@@ -372,7 +407,9 @@ export default function ExpensesPage() {
                     <input
                       type="number"
                       value={paymentAmount}
-                      onChange={(e) => setPaymentAmount(e.target.value)}
+                      onChange={(e) =>
+                        setPaymentAmount(e.target.value)
+                      }
                       placeholder="Ödeme tutarı"
                       className="input-style"
                     />
@@ -448,7 +485,9 @@ export default function ExpensesPage() {
                         onChange={(e) =>
                           setEditingExpense({
                             ...editingExpense,
-                            installment: Number(e.target.value || 1),
+                            installment: Number(
+                              e.target.value || 1
+                            ),
                           })
                         }
                         className="input-style"
