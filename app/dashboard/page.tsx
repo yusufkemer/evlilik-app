@@ -102,9 +102,56 @@ export default function DashboardPage() {
                       Yaklaşan Ödemeler
                     </h3>
 
-                    <p className="text-slate-400">
-                      Önümüzdeki 7 gün içinde ödeme görünmüyor.
-                    </p>
+ {expenses.filter((item) => {
+  if (!item.dueDate || item.remaining <= 0) return false;
+
+  const today = new Date();
+  const dueDate = new Date(item.dueDate);
+
+  const diffDays = Math.ceil(
+    (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  return diffDays >= 0 && diffDays <= 7;
+}).length === 0 ? (
+  <p className="text-slate-400">
+    Önümüzdeki 7 gün içinde ödeme görünmüyor.
+  </p>
+) : (
+  <div className="space-y-3">
+    {expenses
+      .filter((item) => {
+        if (!item.dueDate || item.remaining <= 0) return false;
+
+        const today = new Date();
+        const dueDate = new Date(item.dueDate);
+
+        const diffDays = Math.ceil(
+          (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
+        return diffDays >= 0 && diffDays <= 7;
+      })
+      .map((item) => (
+        <div
+          key={item.id}
+          className="bg-[#061122] border border-slate-700 rounded-xl p-4"
+        >
+          <p className="text-white font-bold">
+            {item.title}
+          </p>
+
+          <p className="text-red-400 font-bold mt-1">
+            Kalan: {item.remaining.toLocaleString("tr-TR")} ₺
+          </p>
+
+          <p className="text-slate-400 text-sm mt-1">
+            Son ödeme: {item.dueDate}
+          </p>
+        </div>
+      ))}
+  </div>
+)}
                   </div>
                 </div>
               </div>
