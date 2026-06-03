@@ -33,6 +33,19 @@ export default function DashboardPage() {
   const percent =
     totalDebt > 0 ? Math.round((totalPaid / totalDebt) * 100) : 0;
 
+  const upcomingPayments = expenses.filter((item) => {
+    if (!item.dueDate || item.remaining <= 0) return false;
+
+    const today = new Date();
+    const dueDate = new Date(item.dueDate);
+
+    const diffDays = Math.ceil(
+      (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    return diffDays >= 0 && diffDays <= 7;
+  });
+
   return (
     <AuthGuard>
       <main className="min-h-screen bg-[#020817] text-white overflow-x-hidden">
@@ -44,6 +57,7 @@ export default function DashboardPage() {
               <div className="flex items-start justify-between mb-8">
                 <div>
                   <h1 className="text-4xl font-black">Dashboard</h1>
+
                   <p className="text-slate-400 text-lg mt-2">
                     Genel finans görünümü
                   </p>
@@ -56,6 +70,7 @@ export default function DashboardPage() {
 
                   <div>
                     <p className="text-slate-400 text-sm">Bugün</p>
+
                     <p className="text-lg font-black">
                       {new Date().toLocaleDateString("tr-TR")}
                     </p>
@@ -64,9 +79,26 @@ export default function DashboardPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <Card icon="💰" title="Toplam Borç" value={totalDebt} color="text-white" />
-                <Card icon="✅" title="Toplam Ödenen" value={totalPaid} color="text-green-400" />
-                <Card icon="⏳" title="Kalan Borç" value={totalRemaining} color="text-red-400" />
+                <Card
+                  icon="💰"
+                  title="Toplam Borç"
+                  value={totalDebt}
+                  color="text-white"
+                />
+
+                <Card
+                  icon="✅"
+                  title="Toplam Ödenen"
+                  value={totalPaid}
+                  color="text-green-400"
+                />
+
+                <Card
+                  icon="⏳"
+                  title="Kalan Borç"
+                  value={totalRemaining}
+                  color="text-red-400"
+                />
               </div>
 
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
@@ -97,61 +129,60 @@ export default function DashboardPage() {
                     📅
                   </div>
 
-                  <div>
+                  <div className="flex-1">
                     <h3 className="text-2xl font-black mb-4">
                       Yaklaşan Ödemeler
                     </h3>
 
- {expenses.filter((item) => {
-  if (!item.dueDate || item.remaining <= 0) return false;
+                    {upcomingPayments.length === 0 ? (
+                      <p className="text-slate-400">
+                        Önümüzdeki 7 gün içinde ödeme görünmüyor.
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        {upcomingPayments.map((item) => {
+                          const today = new Date();
+                          const dueDate = new Date(item.dueDate);
 
-  const today = new Date();
-  const dueDate = new Date(item.dueDate);
+                          const diffDays = Math.ceil(
+                            (dueDate.getTime() - today.getTime()) /
+                              (1000 * 60 * 60 * 24)
+                          );
 
-  const diffDays = Math.ceil(
-    (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-  );
+                          return (
+                            <div
+                              key={item.id}
+                              className="bg-[#061122] border border-slate-700 rounded-xl p-4"
+                            >
+                              <div className="flex justify-between gap-4">
+                                <div>
+                                  <p className="text-white font-bold">
+                                    {item.title}
+                                  </p>
 
-  return diffDays >= 0 && diffDays <= 7;
-}).length === 0 ? (
-  <p className="text-slate-400">
-    Önümüzdeki 7 gün içinde ödeme görünmüyor.
-  </p>
-) : (
-  <div className="space-y-3">
-    {expenses
-      .filter((item) => {
-        if (!item.dueDate || item.remaining <= 0) return false;
+                                  <p className="text-red-400 font-bold mt-1">
+                                    Kalan:{" "}
+                                    {item.remaining.toLocaleString("tr-TR")} ₺
+                                  </p>
 
-        const today = new Date();
-        const dueDate = new Date(item.dueDate);
+                                  <p className="text-slate-400 text-sm mt-1">
+                                    Son ödeme: {item.dueDate}
+                                  </p>
+                                </div>
 
-        const diffDays = Math.ceil(
-          (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-        );
-
-        return diffDays >= 0 && diffDays <= 7;
-      })
-      .map((item) => (
-        <div
-          key={item.id}
-          className="bg-[#061122] border border-slate-700 rounded-xl p-4"
-        >
-          <p className="text-white font-bold">
-            {item.title}
-          </p>
-
-          <p className="text-red-400 font-bold mt-1">
-            Kalan: {item.remaining.toLocaleString("tr-TR")} ₺
-          </p>
-
-          <p className="text-slate-400 text-sm mt-1">
-            Son ödeme: {item.dueDate}
-          </p>
-        </div>
-      ))}
-  </div>
-)}
+                                <div className="text-right shrink-0">
+                                  <span className="bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-bold">
+                                    {diffDays === 0
+                                      ? "Bugün"
+                                      : `${diffDays} gün`}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -218,7 +249,7 @@ function Card({
   icon,
   title,
   value,
-  color
+  color,
 }: {
   icon: string;
   title: string;
