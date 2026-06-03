@@ -8,13 +8,16 @@ import {
   getExpenses,
   addExpenseToDB,
   deleteExpenseFromDB,
-  updateExpenseInDB
+  updateExpenseInDB,
 } from "../lib/store";
 
 export default function ExpensesPage() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+
+  const [paymentExpense, setPaymentExpense] = useState<Expense | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState("");
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Mobilya");
@@ -58,12 +61,15 @@ export default function ExpensesPage() {
       monthlyPayment: totalValue / installmentValue,
       dueDate,
       note,
-      paymentHistory: [
-        {
-          amount: paidValue,
-          date: new Date().toLocaleDateString("tr-TR")
-        }
-      ]
+      paymentHistory:
+        paidValue > 0
+          ? [
+              {
+                amount: paidValue,
+                date: new Date().toLocaleDateString("tr-TR"),
+              },
+            ]
+          : [],
     });
 
     await loadExpenses();
@@ -77,27 +83,38 @@ export default function ExpensesPage() {
     setNote("");
   }
 
-  async function addPayment(item: Expense) {
-    const payment = prompt("Ödeme miktarını gir");
-    if (!payment) return;
+  async function savePayment() {
+    if (!paymentExpense || !paymentAmount) return;
 
-    const paymentValue = Number(payment);
-    const finalPaid = Math.min(item.paid + paymentValue, item.total);
+    const paymentValue = Number(paymentAmount);
+
+    if (paymentValue <= 0) {
+      alert("Geçerli bir ödeme tutarı gir.");
+      return;
+    }
+
+    const finalPaid = Math.min(
+      paymentExpense.paid + paymentValue,
+      paymentExpense.total
+    );
 
     await updateExpenseInDB({
-      ...item,
+      ...paymentExpense,
       paid: finalPaid,
-      remaining: item.total - finalPaid,
+      remaining: paymentExpense.total - finalPaid,
       paymentHistory: [
-        ...(item.paymentHistory || []),
+        ...(paymentExpense.paymentHistory || []),
         {
           amount: paymentValue,
-          date: new Date().toLocaleDateString("tr-TR")
-        }
-      ]
+          date: new Date().toLocaleDateString("tr-TR"),
+        },
+      ],
     });
 
     await loadExpenses();
+
+    setPaymentExpense(null);
+    setPaymentAmount("");
   }
 
   async function deleteExpense(id?: string) {
@@ -120,7 +137,7 @@ export default function ExpensesPage() {
       ...editingExpense,
       remaining: editingExpense.total - editingExpense.paid,
       monthlyPayment:
-        editingExpense.total / Number(editingExpense.installment || 1)
+        editingExpense.total / Number(editingExpense.installment || 1),
     });
 
     await loadExpenses();
@@ -285,7 +302,7 @@ export default function ExpensesPage() {
                           </button>
 
                           <button
-                            onClick={() => addPayment(item)}
+                            onClick={() => setPaymentExpense(item)}
                             className="bg-green-600 hover:bg-green-700 px-5 py-3 rounded-xl font-bold"
                           >
                             Ödeme Ekle
@@ -341,6 +358,47 @@ export default function ExpensesPage() {
                 })}
               </div>
 
+              {paymentExpense && (
+                <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-5">
+                  <div className="w-full max-w-md bg-[#08172b] border border-slate-700 rounded-2xl p-6">
+                    <h3 className="text-3xl font-black mb-3">
+                      Ödeme Ekle
+                    </h3>
+
+                    <p className="text-slate-400 mb-6">
+                      {paymentExpense.title}
+                    </p>
+
+                    <input
+                      type="number"
+                      value={paymentAmount}
+                      onChange={(e) => setPaymentAmount(e.target.value)}
+                      placeholder="Ödeme tutarı"
+                      className="input-style"
+                    />
+
+                    <div className="flex gap-3 mt-6">
+                      <button
+                        onClick={savePayment}
+                        className="bg-green-600 px-8 py-4 rounded-xl font-black"
+                      >
+                        Kaydet
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setPaymentExpense(null);
+                          setPaymentAmount("");
+                        }}
+                        className="bg-red-600 px-8 py-4 rounded-xl font-black"
+                      >
+                        İptal
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {editingExpense && (
                 <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-5">
                   <div className="w-full max-w-3xl bg-[#08172b] border border-slate-700 rounded-2xl p-6">
@@ -354,7 +412,7 @@ export default function ExpensesPage() {
                         onChange={(e) =>
                           setEditingExpense({
                             ...editingExpense,
-                            title: e.target.value
+                            title: e.target.value,
                           })
                         }
                         className="input-style"
@@ -366,7 +424,7 @@ export default function ExpensesPage() {
                         onChange={(e) =>
                           setEditingExpense({
                             ...editingExpense,
-                            total: Number(e.target.value)
+                            total: Number(e.target.value),
                           })
                         }
                         className="input-style"
@@ -378,7 +436,7 @@ export default function ExpensesPage() {
                         onChange={(e) =>
                           setEditingExpense({
                             ...editingExpense,
-                            paid: Number(e.target.value)
+                            paid: Number(e.target.value),
                           })
                         }
                         className="input-style"
@@ -390,7 +448,7 @@ export default function ExpensesPage() {
                         onChange={(e) =>
                           setEditingExpense({
                             ...editingExpense,
-                            installment: Number(e.target.value || 1)
+                            installment: Number(e.target.value || 1),
                           })
                         }
                         className="input-style"
@@ -425,7 +483,7 @@ export default function ExpensesPage() {
 
 function Field({
   label,
-  children
+  children,
 }: {
   label: string;
   children: React.ReactNode;
@@ -444,7 +502,7 @@ function Field({
 function AmountCard({
   title,
   value,
-  color
+  color,
 }: {
   title: string;
   value: number;
