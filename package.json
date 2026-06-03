@@ -10,10 +10,10 @@
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.8",
     "firebase": "^11.9.1",
-    "next": "15.3.3",
+    "next": "^16.2.7",
     "postcss": "^8.5.4",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "tailwindcss": "^4.1.8"
   },
   "devDependencies": {
