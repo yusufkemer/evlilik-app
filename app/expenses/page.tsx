@@ -8,7 +8,7 @@ import {
   getExpenses,
   addExpenseToDB,
   deleteExpenseFromDB,
-  updateExpenseInDB,
+  updateExpenseInDB
 } from "../lib/store";
 
 export default function ExpensesPage() {
@@ -61,9 +61,9 @@ export default function ExpensesPage() {
       paymentHistory: [
         {
           amount: paidValue,
-          date: new Date().toLocaleDateString("tr-TR"),
-        },
-      ],
+          date: new Date().toLocaleDateString("tr-TR")
+        }
+      ]
     });
 
     await loadExpenses();
@@ -92,9 +92,9 @@ export default function ExpensesPage() {
         ...(item.paymentHistory || []),
         {
           amount: paymentValue,
-          date: new Date().toLocaleDateString("tr-TR"),
-        },
-      ],
+          date: new Date().toLocaleDateString("tr-TR")
+        }
+      ]
     });
 
     await loadExpenses();
@@ -120,7 +120,7 @@ export default function ExpensesPage() {
       ...editingExpense,
       remaining: editingExpense.total - editingExpense.paid,
       monthlyPayment:
-        editingExpense.total / Number(editingExpense.installment || 1),
+        editingExpense.total / Number(editingExpense.installment || 1)
     });
 
     await loadExpenses();
@@ -129,27 +129,26 @@ export default function ExpensesPage() {
 
   return (
     <AuthGuard>
-      <main className="app-main">
-        <div className="app-layout">
+      <main className="min-h-screen bg-[#020817] text-white overflow-x-hidden">
+        <div className="flex min-h-screen">
           <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
-          <section className="page-area">
-            <button className="mobile-menu-btn" onClick={() => setMobileOpen(true)}>
-              ☰
-            </button>
+          <section className="page-shell">
+            <div className="page-inner">
+              <div className="mb-8">
+                <h1 className="text-4xl font-black">Masraflar</h1>
 
-            <div className="page-container">
-              <div className="page-header">
-                <div>
-                  <h1 className="page-title">Masraflar</h1>
-                  <p className="page-subtitle">Evlilik harcamalarını yönet</p>
-                </div>
+                <p className="text-slate-400 text-lg mt-2">
+                  Evlilik harcamalarını yönet
+                </p>
               </div>
 
-              <div className="panel" style={{ marginBottom: 28 }}>
-                <h3 className="panel-title">Yeni Masraf Ekle</h3>
+              <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-6 mb-6">
+                <h3 className="text-2xl font-black mb-6">
+                  Yeni Masraf Ekle
+                </h3>
 
-                <div className="form-grid">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <Field label="Masraf adı">
                     <input
                       value={title}
@@ -214,24 +213,30 @@ export default function ExpensesPage() {
                   </Field>
                 </div>
 
-                <div style={{ marginTop: 24 }}>
-                  <label className="field-label">Not</label>
+                <div className="mt-6">
+                  <label className="text-white font-semibold block mb-2">
+                    Not
+                  </label>
+
                   <textarea
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder="Not"
-                    className="textarea-style"
+                    className="input-style min-h-[95px] resize-none"
                   />
                 </div>
 
-                <div className="action-row">
-                  <button onClick={addExpense} className="primary-btn">
+                <div className="flex justify-end mt-6">
+                  <button
+                    onClick={addExpense}
+                    className="bg-blue-600 hover:bg-blue-700 px-8 py-4 rounded-xl font-black"
+                  >
                     Masrafı Kaydet
                   </button>
                 </div>
               </div>
 
-              <div className="list-space">
+              <div className="space-y-6">
                 {expenses.map((item) => {
                   const percent =
                     item.total > 0
@@ -239,77 +244,97 @@ export default function ExpensesPage() {
                       : 0;
 
                   return (
-                    <div key={item.id} className="panel">
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          gap: 24,
-                          flexWrap: "wrap",
-                          marginBottom: 24,
-                        }}
-                      >
-                        <div className="item-left">
-                          <div className="item-icon">🧾</div>
+                    <div
+                      key={item.id}
+                      className="bg-[#08172b] border border-slate-700 rounded-2xl p-6"
+                    >
+                      <div className="flex flex-col xl:flex-row justify-between gap-6 mb-7">
+                        <div className="flex items-start gap-5">
+                          <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-3xl shrink-0">
+                            🧾
+                          </div>
 
                           <div>
-                            <div className="item-title-row">
-                              <h3 className="item-title">{item.title}</h3>
-                              <span className="badge">{item.category}</span>
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <h3 className="text-3xl font-black">
+                                {item.title}
+                              </h3>
+
+                              <span className="bg-blue-600 px-3 py-1 rounded-lg font-bold">
+                                {item.category}
+                              </span>
                             </div>
 
-                            <p className="item-meta">
+                            <p className="text-slate-400 text-lg mt-2">
                               Son ödeme: {item.dueDate || "Belirtilmedi"}
                             </p>
 
-                            <p className="text-yellow" style={{ fontWeight: 900, marginTop: 8 }}>
-                              Aylık ödeme: {item.monthlyPayment.toLocaleString("tr-TR")} ₺
+                            <p className="text-yellow-400 text-lg font-bold mt-2">
+                              Aylık ödeme:{" "}
+                              {item.monthlyPayment.toLocaleString("tr-TR")} ₺
                             </p>
                           </div>
                         </div>
 
-                        <div className="button-group">
+                        <div className="flex gap-3 flex-wrap xl:justify-end">
                           <button
                             onClick={() => setEditingExpense(item)}
-                            className="warning-btn"
+                            className="bg-yellow-500 hover:bg-yellow-600 px-5 py-3 rounded-xl font-bold"
                           >
                             Düzenle
                           </button>
 
                           <button
                             onClick={() => addPayment(item)}
-                            className="success-btn"
+                            className="bg-green-600 hover:bg-green-700 px-5 py-3 rounded-xl font-bold"
                           >
                             Ödeme Ekle
                           </button>
 
                           <button
                             onClick={() => deleteExpense(item.id)}
-                            className="danger-btn"
+                            className="bg-red-600 hover:bg-red-700 px-5 py-3 rounded-xl font-bold"
                           >
                             Sil
                           </button>
                         </div>
                       </div>
 
-                      <div style={{ marginBottom: 24 }}>
-                        <div className="progress-head">
-                          <span className="muted">Ödeme Durumu</span>
-                          <strong>%{percent}</strong>
+                      <div className="mb-7">
+                        <div className="flex justify-between mb-3">
+                          <span className="text-slate-400 text-lg">
+                            Ödeme Durumu
+                          </span>
+
+                          <span className="font-black text-lg">%{percent}</span>
                         </div>
 
-                        <div className="progress-bar">
+                        <div className="w-full bg-slate-800 h-4 rounded-full overflow-hidden">
                           <div
-                            className="progress-fill"
+                            className="bg-green-500 h-4 rounded-full"
                             style={{ width: `${percent}%` }}
                           />
                         </div>
                       </div>
 
-                      <div className="amount-grid">
-                        <AmountCard title="Toplam" value={item.total} color="" />
-                        <AmountCard title="Ödenen" value={item.paid} color="text-green" />
-                        <AmountCard title="Kalan" value={item.remaining} color="text-red" />
+                      <div className="grid grid-cols-1 md:grid-cols-3 border border-slate-700 rounded-xl overflow-hidden bg-[#061122]">
+                        <AmountCard
+                          title="Toplam"
+                          value={item.total}
+                          color="text-white"
+                        />
+
+                        <AmountCard
+                          title="Ödenen"
+                          value={item.paid}
+                          color="text-green-400"
+                        />
+
+                        <AmountCard
+                          title="Kalan"
+                          value={item.remaining}
+                          color="text-red-400"
+                        />
                       </div>
                     </div>
                   );
@@ -317,17 +342,19 @@ export default function ExpensesPage() {
               </div>
 
               {editingExpense && (
-                <div className="modal-backdrop">
-                  <div className="modal-card">
-                    <h3 className="panel-title">Masraf Düzenle</h3>
+                <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-5">
+                  <div className="w-full max-w-3xl bg-[#08172b] border border-slate-700 rounded-2xl p-6">
+                    <h3 className="text-3xl font-black mb-7">
+                      Masraf Düzenle
+                    </h3>
 
-                    <div className="form-grid" style={{ gridTemplateColumns: "repeat(2, 1fr)" }}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       <input
                         value={editingExpense.title}
                         onChange={(e) =>
                           setEditingExpense({
                             ...editingExpense,
-                            title: e.target.value,
+                            title: e.target.value
                           })
                         }
                         className="input-style"
@@ -339,7 +366,7 @@ export default function ExpensesPage() {
                         onChange={(e) =>
                           setEditingExpense({
                             ...editingExpense,
-                            total: Number(e.target.value),
+                            total: Number(e.target.value)
                           })
                         }
                         className="input-style"
@@ -351,7 +378,7 @@ export default function ExpensesPage() {
                         onChange={(e) =>
                           setEditingExpense({
                             ...editingExpense,
-                            paid: Number(e.target.value),
+                            paid: Number(e.target.value)
                           })
                         }
                         className="input-style"
@@ -363,21 +390,24 @@ export default function ExpensesPage() {
                         onChange={(e) =>
                           setEditingExpense({
                             ...editingExpense,
-                            installment: Number(e.target.value || 1),
+                            installment: Number(e.target.value || 1)
                           })
                         }
                         className="input-style"
                       />
                     </div>
 
-                    <div className="button-group" style={{ marginTop: 24 }}>
-                      <button onClick={saveEdit} className="success-btn">
+                    <div className="flex gap-3 mt-6">
+                      <button
+                        onClick={saveEdit}
+                        className="bg-green-600 px-8 py-4 rounded-xl font-black"
+                      >
                         Kaydet
                       </button>
 
                       <button
                         onClick={() => setEditingExpense(null)}
-                        className="danger-btn"
+                        className="bg-red-600 px-8 py-4 rounded-xl font-black"
                       >
                         İptal
                       </button>
@@ -395,14 +425,17 @@ export default function ExpensesPage() {
 
 function Field({
   label,
-  children,
+  children
 }: {
   label: string;
   children: React.ReactNode;
 }) {
   return (
     <div>
-      <label className="field-label">{label}</label>
+      <label className="text-white font-semibold block mb-2">
+        {label}
+      </label>
+
       {children}
     </div>
   );
@@ -411,17 +444,17 @@ function Field({
 function AmountCard({
   title,
   value,
-  color,
+  color
 }: {
   title: string;
   value: number;
   color: string;
 }) {
   return (
-    <div className="amount-cell">
-      <p className="muted">{title}</p>
+    <div className="p-5 border-b md:border-b-0 md:border-r last:border-r-0 border-slate-700">
+      <p className="text-slate-400 text-lg">{title}</p>
 
-      <h4 className={`money-lg ${color}`} style={{ marginTop: 8 }}>
+      <h4 className={`text-3xl font-black mt-3 ${color}`}>
         {value.toLocaleString("tr-TR")} ₺
       </h4>
     </div>

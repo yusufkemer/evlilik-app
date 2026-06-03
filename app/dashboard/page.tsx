@@ -29,99 +29,129 @@ export default function DashboardPage() {
   );
 
   const totalRemaining = totalDebt - totalPaid;
-  const percent = totalDebt > 0 ? Math.round((totalPaid / totalDebt) * 100) : 0;
+
+  const percent =
+    totalDebt > 0 ? Math.round((totalPaid / totalDebt) * 100) : 0;
 
   return (
     <AuthGuard>
-      <main className="app-main">
-        <div className="app-layout">
+      <main className="min-h-screen bg-[#020817] text-white overflow-x-hidden">
+        <div className="flex min-h-screen">
           <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
-          <section className="page-area">
-            <button className="mobile-menu-btn" onClick={() => setMobileOpen(true)}>
-              ☰
-            </button>
-
-            <div className="page-container">
-              <div className="page-header">
+          <section className="page-shell">
+            <div className="page-inner">
+              <div className="flex items-start justify-between mb-8">
                 <div>
-                  <h1 className="page-title">Dashboard</h1>
-                  <p className="page-subtitle">Genel finans görünümü</p>
-                </div>
-
-                <TodayBox />
-              </div>
-
-              <div className="grid-3">
-                <StatCard icon="💰" title="Toplam Borç" value={totalDebt} color="" />
-                <StatCard icon="✅" title="Toplam Ödenen" value={totalPaid} color="text-green" />
-                <StatCard icon="⏳" title="Kalan Borç" value={totalRemaining} color="text-red" />
-              </div>
-
-              <div className="grid-2">
-                <div className="panel">
-                  <h3 className="panel-title">Genel Ödeme İlerlemesi</h3>
-
-                  <div className="progress-head">
-                    <span className="muted">Tamamlanma</span>
-                    <strong>%{percent}</strong>
-                  </div>
-
-                  <div className="progress-bar">
-                    <div
-                      className="progress-fill"
-                      style={{ width: `${percent}%` }}
-                    />
-                  </div>
-
-                  <p className="muted" style={{ marginTop: 22 }}>
-                    Toplam borcun %{percent} kadarı ödenmiş durumda.
+                  <h1 className="text-4xl font-black">Dashboard</h1>
+                  <p className="text-slate-400 text-lg mt-2">
+                    Genel finans görünümü
                   </p>
                 </div>
 
-                <div className="panel" style={{ display: "flex", gap: 24, alignItems: "flex-start" }}>
-                  <div className="stat-icon" style={{ background: "rgba(168,85,247,0.25)" }}>
+                <div className="hidden md:flex items-center gap-4 bg-[#08172b] border border-slate-700 rounded-2xl px-5 py-3">
+                  <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-2xl">
                     📅
                   </div>
 
                   <div>
-                    <h3 className="panel-title">Yaklaşan Ödemeler</h3>
-                    <p className="muted">Önümüzdeki 7 gün içinde ödeme görünmüyor.</p>
+                    <p className="text-slate-400 text-sm">Bugün</p>
+                    <p className="text-lg font-black">
+                      {new Date().toLocaleDateString("tr-TR")}
+                    </p>
                   </div>
                 </div>
               </div>
 
-              <div className="panel recent-box">
-                <h3 className="panel-title">Son Eklenen Masraflar</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <Card icon="💰" title="Toplam Borç" value={totalDebt} color="text-white" />
+                <Card icon="✅" title="Toplam Ödenen" value={totalPaid} color="text-green-400" />
+                <Card icon="⏳" title="Kalan Borç" value={totalRemaining} color="text-red-400" />
+              </div>
 
-                <div className="list-space">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
+                <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-6">
+                  <h3 className="text-2xl font-black mb-5">
+                    Genel Ödeme İlerlemesi
+                  </h3>
+
+                  <div className="flex justify-between mb-3">
+                    <p className="text-slate-400">Tamamlanma</p>
+                    <p className="font-black">%{percent}</p>
+                  </div>
+
+                  <div className="w-full bg-slate-800 h-4 rounded-full overflow-hidden">
+                    <div
+                      className="bg-green-500 h-4 rounded-full"
+                      style={{ width: `${percent}%` }}
+                    />
+                  </div>
+
+                  <p className="text-slate-400 mt-5">
+                    Toplam borcun %{percent} kadarı ödenmiş durumda.
+                  </p>
+                </div>
+
+                <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-6 flex gap-5 items-start">
+                  <div className="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center text-3xl shrink-0">
+                    📅
+                  </div>
+
+                  <div>
+                    <h3 className="text-2xl font-black mb-4">
+                      Yaklaşan Ödemeler
+                    </h3>
+
+                    <p className="text-slate-400">
+                      Önümüzdeki 7 gün içinde ödeme görünmüyor.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-6 min-h-[260px]">
+                <h3 className="text-2xl font-black mb-6">
+                  Son Eklenen Masraflar
+                </h3>
+
+                <div className="space-y-4">
                   {expenses.length === 0 && (
-                    <p className="muted">Henüz masraf kaydı yok.</p>
+                    <p className="text-slate-400">Henüz masraf kaydı yok.</p>
                   )}
 
                   {expenses.slice(0, 5).map((item) => (
-                    <div key={item.id} className="item-row">
-                      <div className="item-left">
-                        <div className="item-icon">🧾</div>
+                    <div
+                      key={item.id}
+                      className="bg-[#061122] border border-slate-700 rounded-2xl p-5 flex flex-col md:flex-row justify-between gap-5"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-2xl shrink-0">
+                          🧾
+                        </div>
 
                         <div>
-                          <div className="item-title-row">
-                            <h4 className="item-title">{item.title}</h4>
-                            <span className="badge">{item.category}</span>
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <h4 className="text-xl font-black">
+                              {item.title}
+                            </h4>
+
+                            <span className="bg-blue-600 px-3 py-1 rounded-lg text-sm font-bold">
+                              {item.category}
+                            </span>
                           </div>
 
-                          <p className="item-meta">
+                          <p className="text-slate-400 mt-2">
                             Son ödeme: {item.dueDate || "Belirtilmedi"}
                           </p>
                         </div>
                       </div>
 
-                      <div className="item-right">
-                        <p className="money-lg">
+                      <div className="text-left md:text-right">
+                        <p className="text-2xl font-black">
                           {item.total.toLocaleString("tr-TR")} ₺
                         </p>
 
-                        <p className="text-green" style={{ fontWeight: 900, marginTop: 8 }}>
+                        <p className="text-green-400 font-bold mt-2">
                           Ödenen: {item.paid.toLocaleString("tr-TR")} ₺
                         </p>
                       </div>
@@ -137,23 +167,11 @@ export default function DashboardPage() {
   );
 }
 
-function TodayBox() {
-  return (
-    <div className="today-box">
-      <div className="today-icon">📅</div>
-      <div>
-        <p className="today-label">Bugün</p>
-        <p className="today-date">{new Date().toLocaleDateString("tr-TR")}</p>
-      </div>
-    </div>
-  );
-}
-
-function StatCard({
+function Card({
   icon,
   title,
   value,
-  color,
+  color
 }: {
   icon: string;
   title: string;
@@ -161,12 +179,15 @@ function StatCard({
   color: string;
 }) {
   return (
-    <div className="stat-card">
-      <div className="stat-icon">{icon}</div>
+    <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-6 flex items-center gap-5">
+      <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center text-3xl shrink-0">
+        {icon}
+      </div>
 
       <div>
-        <p className="stat-name">{title}</p>
-        <h2 className={`stat-value ${color}`}>
+        <p className="text-slate-400 font-bold">{title}</p>
+
+        <h2 className={`text-3xl font-black mt-2 ${color}`}>
           {value.toLocaleString("tr-TR")} ₺
         </h2>
       </div>

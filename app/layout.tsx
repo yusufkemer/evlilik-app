@@ -3,11 +3,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "WeddingPro",
-  description: "Evlilik Finans Yönetimi",
+  description: "Evlilik Finans Yönetimi"
 };
 
 export default function RootLayout({
-  children,
+  children
 }: Readonly<{
   children: React.ReactNode;
 }>) {

@@ -1,10 +1,10 @@
 import {
-  collection,
   addDoc,
-  getDocs,
+  collection,
   deleteDoc,
   doc,
-  updateDoc,
+  getDocs,
+  updateDoc
 } from "firebase/firestore";
 
 import { db } from "./firebase";
@@ -38,7 +38,7 @@ export async function getExpenses(): Promise<Expense[]> {
   querySnapshot.forEach((docItem) => {
     expenses.push({
       id: docItem.id,
-      ...(docItem.data() as Omit<Expense, "id">),
+      ...(docItem.data() as Omit<Expense, "id">)
     });
   });
 
@@ -59,6 +59,15 @@ export async function updateExpenseInDB(expense: Expense) {
   const expenseRef = doc(db, COLLECTION_NAME, expense.id);
 
   await updateDoc(expenseRef, {
-    ...expense,
+    title: expense.title,
+    category: expense.category,
+    total: expense.total,
+    paid: expense.paid,
+    remaining: expense.remaining,
+    installment: expense.installment,
+    monthlyPayment: expense.monthlyPayment,
+    dueDate: expense.dueDate,
+    note: expense.note,
+    paymentHistory: expense.paymentHistory || []
   });
 }
