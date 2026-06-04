@@ -1,9 +1,20 @@
-import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  updateDoc,
+} from "firebase/firestore";
+
 import { db } from "./firebase";
+
+export type PaidBy = "Yusuf" | "Büşra";
 
 export type PaymentHistory = {
   amount: number;
   date: string;
+  paidBy?: PaidBy;
 };
 
 export type Expense = {
@@ -24,6 +35,7 @@ const COLLECTION_NAME = "expenses";
 
 export async function getExpenses(): Promise<Expense[]> {
   const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
+
   const expenses: Expense[] = [];
 
   querySnapshot.forEach((docItem) => {
