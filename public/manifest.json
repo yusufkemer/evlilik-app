@@ -1,8 +1,9 @@
 {
-  "name": "Evlilik Finans Takip",
-  "short_name": "EvlilikApp",
+  "name": "WeddingPro Evlilik Finans",
+  "short_name": "WeddingPro",
   "description": "Evlilik masraf ve ödeme takip sistemi",
-  "start_url": "/",
+  "start_url": "/dashboard",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#020817",
   "theme_color": "#020817",
