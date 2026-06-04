@@ -19,7 +19,7 @@ export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [filter, setFilter] = useState<FilterType>("all");
-
+const [searchTerm, setSearchTerm] = useState("");
   const [paymentExpense, setPaymentExpense] = useState<Expense | null>(null);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentBy, setPaymentBy] = useState<PaidBy>("Yusuf");
@@ -41,17 +41,27 @@ export default function ExpensesPage() {
     loadExpenses();
   }, []);
 
-  const filteredExpenses = expenses.filter((item) => {
-    if (filter === "paid") {
-      return item.remaining <= 0;
-    }
+const filteredExpenses = expenses.filter((item) => {
+  const matchesSearch =
+    item.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase()) ||
+    item.category
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
 
-    if (filter === "remaining") {
-      return item.remaining > 0;
-    }
+  if (!matchesSearch) return false;
 
-    return true;
-  });
+  if (filter === "paid") {
+    return item.remaining <= 0;
+  }
+
+  if (filter === "remaining") {
+    return item.remaining > 0;
+  }
+
+  return true;
+});
 
   async function addExpense() {
     if (!title || !category || !total || !paid) {
@@ -180,7 +190,14 @@ export default function ExpensesPage() {
                   Evlilik harcamalarını yönet
                 </p>
               </div>
-
+<div className="bg-[#08172b] border border-slate-700 rounded-2xl p-4 mb-4">
+  <input
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    placeholder="Masraf veya kategori ara..."
+    className="input-style"
+  />
+</div>
               <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-6 mb-6">
                 <h3 className="text-2xl font-black mb-6">
                   Yeni Masraf Ekle
