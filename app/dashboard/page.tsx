@@ -5,6 +5,27 @@ import AuthGuard from "../components/AuthGuard";
 import Sidebar from "../components/Sidebar";
 import { Expense, getExpenses } from "../lib/store";
 
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+import { Line } from "react-chartjs-2";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Legend
+);
+
 export default function DashboardPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -67,6 +88,32 @@ export default function DashboardPage() {
     });
 
     return totals;
+  }, [expenses]);
+
+  const monthlyData = useMemo(() => {
+    const months: Record<string, number> = {};
+
+    expenses.forEach((expense) => {
+      expense.paymentHistory?.forEach((payment) => {
+        const month = payment.date.slice(3, 10);
+
+        months[month] = (months[month] || 0) + payment.amount;
+      });
+    });
+
+    return {
+      labels: Object.keys(months),
+
+      datasets: [
+        {
+          label: "Aylık Ödemeler",
+          data: Object.values(months),
+          borderColor: "#22c55e",
+          backgroundColor: "#22c55e",
+          tension: 0.4,
+        },
+      ],
+    };
   }, [expenses]);
 
   const upcomingPayments = expenses.filter((item) => {
@@ -261,6 +308,55 @@ export default function DashboardPage() {
                     )}
                   </div>
                 </div>
+              </div>
+
+              <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-6 mb-6">
+                <h3 className="text-2xl font-black mb-6">
+                  Aylık Ödeme Trendi
+                </h3>
+
+                {monthlyData.labels.length === 0 ? (
+                  <p className="text-slate-400">
+                    Henüz grafik oluşturacak ödeme verisi yok.
+                  </p>
+                ) : (
+                  <Line
+                    data={monthlyData}
+                    options={{
+                      responsive: true,
+
+                      plugins: {
+                        legend: {
+                          labels: {
+                            color: "#ffffff",
+                          },
+                        },
+                      },
+
+                      scales: {
+                        x: {
+                          ticks: {
+                            color: "#ffffff",
+                          },
+
+                          grid: {
+                            color: "#1e293b",
+                          },
+                        },
+
+                        y: {
+                          ticks: {
+                            color: "#ffffff",
+                          },
+
+                          grid: {
+                            color: "#1e293b",
+                          },
+                        },
+                      },
+                    }}
+                  />
+                )}
               </div>
 
               <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-6 min-h-[260px]">
