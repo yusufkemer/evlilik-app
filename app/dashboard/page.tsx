@@ -79,6 +79,11 @@ export default function DashboardPage() {
 
   const totalExpenseCount = expenses.length;
 
+  const weddingTarget = 750000;
+
+  const targetPercent =
+    weddingTarget > 0 ? Math.round((totalPaid / weddingTarget) * 100) : 0;
+
   const categoryTotals = useMemo(() => {
     const totals: Record<string, number> = {};
 
@@ -211,6 +216,49 @@ export default function DashboardPage() {
                   value={`${totalExpenseCount} adet`}
                   color="text-purple-400"
                 />
+              </div>
+
+              <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-6 mb-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 mb-5">
+                  <div>
+                    <h3 className="text-2xl font-black">
+                      Ev Kurma Hedefi
+                    </h3>
+
+                    <p className="text-slate-400 mt-2">
+                      Hedef: {weddingTarget.toLocaleString("tr-TR")} ₺
+                    </p>
+                  </div>
+
+                  <div className="text-left md:text-right">
+                    <p className="text-slate-400">
+                      Toplam Ödenen
+                    </p>
+
+                    <p className="text-3xl font-black text-green-400">
+                      {totalPaid.toLocaleString("tr-TR")} ₺
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex justify-between mb-3">
+                  <p className="text-slate-400">
+                    Hedef Tamamlanma
+                  </p>
+
+                  <p className="font-black">
+                    %{targetPercent}
+                  </p>
+                </div>
+
+                <div className="w-full bg-slate-800 h-4 rounded-full overflow-hidden">
+                  <div
+                    className="bg-blue-500 h-4 rounded-full"
+                    style={{
+                      width: `${Math.min(targetPercent, 100)}%`,
+                    }}
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
