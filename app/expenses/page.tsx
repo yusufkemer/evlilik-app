@@ -12,18 +12,20 @@ import {
 } from "../lib/store";
 
 type PaidBy = "Yusuf" | "Büşra";
+type FilterType = "all" | "paid" | "remaining";
 
 export default function ExpensesPage() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [filter, setFilter] = useState<FilterType>("all");
 
   const [paymentExpense, setPaymentExpense] = useState<Expense | null>(null);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentBy, setPaymentBy] = useState<PaidBy>("Yusuf");
 
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("Mobilya");
+  const [category, setCategory] = useState("");
   const [total, setTotal] = useState("");
   const [paid, setPaid] = useState("");
   const [installment, setInstallment] = useState("");
@@ -39,9 +41,21 @@ export default function ExpensesPage() {
     loadExpenses();
   }, []);
 
+  const filteredExpenses = expenses.filter((item) => {
+    if (filter === "paid") {
+      return item.remaining <= 0;
+    }
+
+    if (filter === "remaining") {
+      return item.remaining > 0;
+    }
+
+    return true;
+  });
+
   async function addExpense() {
-    if (!title || !total || !paid) {
-      alert("Masraf adı, toplam tutar ve ödenen tutar zorunlu.");
+    if (!title || !category || !total || !paid) {
+      alert("Masraf adı, kategori, toplam tutar ve ödenen tutar zorunlu.");
       return;
     }
 
@@ -79,7 +93,7 @@ export default function ExpensesPage() {
     await loadExpenses();
 
     setTitle("");
-    setCategory("Mobilya");
+    setCategory("");
     setTotal("");
     setPaid("");
     setInstallment("");
@@ -122,7 +136,8 @@ export default function ExpensesPage() {
     setPaymentAmount("");
     setPaymentBy("Yusuf");
   }
-    async function deleteExpense(id?: string) {
+
+  async function deleteExpense(id?: string) {
     if (!id) return;
 
     if (!confirm("Bu masrafı silmek istiyor musun?")) return;
@@ -154,17 +169,12 @@ export default function ExpensesPage() {
     <AuthGuard>
       <main className="min-h-screen bg-[#020817] text-white overflow-x-hidden">
         <div className="flex min-h-screen">
-          <Sidebar
-            mobileOpen={mobileOpen}
-            setMobileOpen={setMobileOpen}
-          />
+          <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
           <section className="page-shell">
             <div className="page-inner">
               <div className="mb-8">
-                <h1 className="text-4xl font-black">
-                  Masraflar
-                </h1>
+                <h1 className="text-4xl font-black">Masraflar</h1>
 
                 <p className="text-slate-400 text-lg mt-2">
                   Evlilik harcamalarını yönet
@@ -187,18 +197,12 @@ export default function ExpensesPage() {
                   </Field>
 
                   <Field label="Kategori">
-                    <select
+                    <input
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
+                      placeholder="Kategori yaz"
                       className="input-style"
-                    >
-                      <option>Mobilya</option>
-                      <option>Beyaz Eşya</option>
-                      <option>Elektronik</option>
-                      <option>Düğün</option>
-                      <option>Takı</option>
-                      <option>Ev Tekstili</option>
-                    </select>
+                    />
                   </Field>
 
                   <Field label="Toplam Tutar">
@@ -239,9 +243,7 @@ export default function ExpensesPage() {
                 </div>
 
                 <div className="mt-6">
-                  <label className="font-semibold block mb-2">
-                    Not
-                  </label>
+                  <label className="font-semibold block mb-2">Not</label>
 
                   <textarea
                     value={note}
@@ -260,13 +262,40 @@ export default function ExpensesPage() {
                 </div>
               </div>
 
+              <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-4 mb-6 flex gap-3 flex-wrap">
+                <button
+                  onClick={() => setFilter("all")}
+                  className={`px-5 py-3 rounded-xl font-bold ${
+                    filter === "all" ? "bg-blue-600" : "bg-[#061122]"
+                  }`}
+                >
+                  Tümü
+                </button>
+
+                <button
+                  onClick={() => setFilter("paid")}
+                  className={`px-5 py-3 rounded-xl font-bold ${
+                    filter === "paid" ? "bg-green-600" : "bg-[#061122]"
+                  }`}
+                >
+                  Ödenenler
+                </button>
+
+                <button
+                  onClick={() => setFilter("remaining")}
+                  className={`px-5 py-3 rounded-xl font-bold ${
+                    filter === "remaining" ? "bg-red-600" : "bg-[#061122]"
+                  }`}
+                >
+                  Borcu Kalanlar
+                </button>
+              </div>
+
               <div className="space-y-6">
-                {expenses.map((item) => {
+                {filteredExpenses.map((item) => {
                   const percent =
                     item.total > 0
-                      ? Math.round(
-                          (item.paid / item.total) * 100
-                        )
+                      ? Math.round((item.paid / item.total) * 100)
                       : 0;
 
                   return (
@@ -285,33 +314,27 @@ export default function ExpensesPage() {
                           </p>
 
                           <p className="text-slate-400 mt-1">
-                            Son ödeme: {item.dueDate}
+                            Son ödeme: {item.dueDate || "Belirtilmedi"}
                           </p>
                         </div>
 
                         <div className="flex gap-3 flex-wrap">
                           <button
-                            onClick={() =>
-                              setEditingExpense(item)
-                            }
+                            onClick={() => setEditingExpense(item)}
                             className="bg-yellow-500 px-5 py-3 rounded-xl font-bold"
                           >
                             Düzenle
                           </button>
 
                           <button
-                            onClick={() =>
-                              setPaymentExpense(item)
-                            }
+                            onClick={() => setPaymentExpense(item)}
                             className="bg-green-600 px-5 py-3 rounded-xl font-bold"
                           >
                             Ödeme Ekle
                           </button>
 
                           <button
-                            onClick={() =>
-                              deleteExpense(item.id)
-                            }
+                            onClick={() => deleteExpense(item.id)}
                             className="bg-red-600 px-5 py-3 rounded-xl font-bold"
                           >
                             Sil
@@ -328,13 +351,12 @@ export default function ExpensesPage() {
                         <div className="w-full bg-slate-800 h-4 rounded-full overflow-hidden">
                           <div
                             className="bg-green-500 h-4"
-                            style={{
-                              width: `${percent}%`,
-                            }}
+                            style={{ width: `${percent}%` }}
                           />
                         </div>
                       </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-3 border border-slate-700 rounded-xl overflow-hidden bg-[#061122] mt-6">
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 border border-slate-700 rounded-xl overflow-hidden bg-[#061122] mt-6">
                         <AmountCard
                           title="Toplam"
                           value={item.total}
@@ -362,38 +384,41 @@ export default function ExpensesPage() {
                             </h4>
 
                             <div className="space-y-3">
-                              {item.paymentHistory.map(
-                                (payment, index) => (
-                                  <div
-                                    key={index}
-                                    className="flex justify-between gap-4 border-b border-slate-800 pb-3 last:border-b-0 last:pb-0"
-                                  >
-                                    <div>
-                                      <p className="text-white font-bold">
-                                        {payment.paidBy || "Yusuf"}
-                                      </p>
+                              {item.paymentHistory.map((payment, index) => (
+                                <div
+                                  key={index}
+                                  className="flex justify-between gap-4 border-b border-slate-800 pb-3 last:border-b-0 last:pb-0"
+                                >
+                                  <div>
+                                    <p className="text-white font-bold">
+                                      {payment.paidBy || "Yusuf"}
+                                    </p>
 
-                                      <p className="text-slate-400 text-sm">
-                                        {payment.date}
-                                      </p>
-                                    </div>
-
-                                    <span className="text-green-400 font-bold">
-                                      +{" "}
-                                      {payment.amount.toLocaleString(
-                                        "tr-TR"
-                                      )}{" "}
-                                      ₺
-                                    </span>
+                                    <p className="text-slate-400 text-sm">
+                                      {payment.date}
+                                    </p>
                                   </div>
-                                )
-                              )}
+
+                                  <span className="text-green-400 font-bold">
+                                    +{" "}
+                                    {payment.amount.toLocaleString("tr-TR")} ₺
+                                  </span>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         )}
                     </div>
                   );
                 })}
+
+                {filteredExpenses.length === 0 && (
+                  <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-6">
+                    <p className="text-slate-400">
+                      Bu filtreye uygun masraf bulunmuyor.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {paymentExpense && (
@@ -429,9 +454,7 @@ export default function ExpensesPage() {
                     <input
                       type="number"
                       value={paymentAmount}
-                      onChange={(e) =>
-                        setPaymentAmount(e.target.value)
-                      }
+                      onChange={(e) => setPaymentAmount(e.target.value)}
                       placeholder="Ödeme tutarı"
                       className="input-style"
                     />
@@ -458,7 +481,8 @@ export default function ExpensesPage() {
                   </div>
                 </div>
               )}
-                            {editingExpense && (
+
+              {editingExpense && (
                 <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-5">
                   <div className="w-full max-w-3xl bg-[#08172b] border border-slate-700 rounded-2xl p-6">
                     <h3 className="text-3xl font-black mb-7">
@@ -472,6 +496,17 @@ export default function ExpensesPage() {
                           setEditingExpense({
                             ...editingExpense,
                             title: e.target.value,
+                          })
+                        }
+                        className="input-style"
+                      />
+
+                      <input
+                        value={editingExpense.category}
+                        onChange={(e) =>
+                          setEditingExpense({
+                            ...editingExpense,
+                            category: e.target.value,
                           })
                         }
                         className="input-style"
@@ -512,7 +547,30 @@ export default function ExpensesPage() {
                         }
                         className="input-style"
                       />
+
+                      <input
+                        type="date"
+                        value={editingExpense.dueDate}
+                        onChange={(e) =>
+                          setEditingExpense({
+                            ...editingExpense,
+                            dueDate: e.target.value,
+                          })
+                        }
+                        className="input-style"
+                      />
                     </div>
+
+                    <textarea
+                      value={editingExpense.note || ""}
+                      onChange={(e) =>
+                        setEditingExpense({
+                          ...editingExpense,
+                          note: e.target.value,
+                        })
+                      }
+                      className="input-style min-h-[100px] mt-5"
+                    />
 
                     <div className="flex gap-3 mt-6">
                       <button
@@ -549,10 +607,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="text-white font-semibold block mb-2">
-        {label}
-      </label>
-
+      <label className="text-white font-semibold block mb-2">{label}</label>
       {children}
     </div>
   );
