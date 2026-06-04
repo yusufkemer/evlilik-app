@@ -44,6 +44,7 @@ export default function DashboardPage() {
     loadData();
 
     const savedTarget = localStorage.getItem("weddingTarget");
+
     if (savedTarget) {
       setWeddingTarget(Number(savedTarget));
     }
@@ -187,17 +188,26 @@ export default function DashboardPage() {
                   </p>
                 </div>
 
-                <div className="hidden md:flex items-center gap-4 bg-[#08172b] border border-slate-700 rounded-2xl px-5 py-3">
-                  <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-2xl">
-                    📅
-                  </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => generatePdfReport(expenses)}
+                    className="bg-green-600 hover:bg-green-700 px-5 py-3 rounded-xl font-bold"
+                  >
+                    PDF Rapor İndir
+                  </button>
 
-                  <div>
-                    <p className="text-slate-400 text-sm">Bugün</p>
+                  <div className="hidden md:flex items-center gap-4 bg-[#08172b] border border-slate-700 rounded-2xl px-5 py-3">
+                    <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-2xl">
+                      📅
+                    </div>
 
-                    <p className="text-lg font-black">
-                      {new Date().toLocaleDateString("tr-TR")}
-                    </p>
+                    <div>
+                      <p className="text-slate-400 text-sm">Bugün</p>
+
+                      <p className="text-lg font-black">
+                        {new Date().toLocaleDateString("tr-TR")}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -250,42 +260,7 @@ export default function DashboardPage() {
                   value={`${totalDebt.toLocaleString("tr-TR")} ₺`}
                   color="text-white"
                 />
-<div className="flex items-start justify-between mb-8">
-  <div>
-    <h1 className="text-4xl font-black">
-      Dashboard
-    </h1>
 
-    <p className="text-slate-400 text-lg mt-2">
-      Genel finans görünümü
-    </p>
-  </div>
-
-  <div className="flex items-center gap-3">
-    <button
-      onClick={() => generatePdfReport(expenses)}
-      className="bg-green-600 hover:bg-green-700 px-5 py-3 rounded-xl font-bold"
-    >
-      PDF Rapor İndir
-    </button>
-
-    <div className="hidden md:flex items-center gap-4 bg-[#08172b] border border-slate-700 rounded-2xl px-5 py-3">
-      <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-2xl">
-        📅
-      </div>
-
-      <div>
-        <p className="text-slate-400 text-sm">
-          Bugün
-        </p>
-
-        <p className="text-lg font-black">
-          {new Date().toLocaleDateString("tr-TR")}
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
                 <Card
                   icon="✅"
                   title="Toplam Ödenen"
