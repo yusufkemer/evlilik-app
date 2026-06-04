@@ -30,8 +30,7 @@ export default function DashboardPage() {
 
   const totalRemaining = totalDebt - totalPaid;
 
-  const percent =
-    totalDebt > 0 ? Math.round((totalPaid / totalDebt) * 100) : 0;
+  const percent = totalDebt > 0 ? Math.round((totalPaid / totalDebt) * 100) : 0;
 
   const upcomingPayments = expenses.filter((item) => {
     if (!item.dueDate || item.remaining <= 0) return false;
@@ -79,26 +78,9 @@ export default function DashboardPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <Card
-                  icon="💰"
-                  title="Toplam Borç"
-                  value={totalDebt}
-                  color="text-white"
-                />
-
-                <Card
-                  icon="✅"
-                  title="Toplam Ödenen"
-                  value={totalPaid}
-                  color="text-green-400"
-                />
-
-                <Card
-                  icon="⏳"
-                  title="Kalan Borç"
-                  value={totalRemaining}
-                  color="text-red-400"
-                />
+                <Card icon="💰" title="Toplam Borç" value={totalDebt} color="text-white" />
+                <Card icon="✅" title="Toplam Ödenen" value={totalPaid} color="text-green-400" />
+                <Card icon="⏳" title="Kalan Borç" value={totalRemaining} color="text-red-400" />
               </div>
 
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
@@ -113,10 +95,7 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="w-full bg-slate-800 h-4 rounded-full overflow-hidden">
-                    <div
-                      className="bg-green-500 h-4 rounded-full"
-                      style={{ width: `${percent}%` }}
-                    />
+                    <div className="bg-green-500 h-4 rounded-full" style={{ width: `${percent}%` }} />
                   </div>
 
                   <p className="text-slate-400 mt-5">
@@ -145,8 +124,7 @@ export default function DashboardPage() {
                           const dueDate = new Date(item.dueDate);
 
                           const diffDays = Math.ceil(
-                            (dueDate.getTime() - today.getTime()) /
-                              (1000 * 60 * 60 * 24)
+                            (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
                           );
 
                           return (
@@ -156,13 +134,10 @@ export default function DashboardPage() {
                             >
                               <div className="flex justify-between gap-4">
                                 <div>
-                                  <p className="text-white font-bold">
-                                    {item.title}
-                                  </p>
+                                  <p className="text-white font-bold">{item.title}</p>
 
                                   <p className="text-red-400 font-bold mt-1">
-                                    Kalan:{" "}
-                                    {item.remaining.toLocaleString("tr-TR")} ₺
+                                    Kalan: {item.remaining.toLocaleString("tr-TR")} ₺
                                   </p>
 
                                   <p className="text-slate-400 text-sm mt-1">
@@ -172,9 +147,7 @@ export default function DashboardPage() {
 
                                 <div className="text-right shrink-0">
                                   <span className="bg-red-600 text-white px-3 py-1 rounded-lg text-sm font-bold">
-                                    {diffDays === 0
-                                      ? "Bugün"
-                                      : `${diffDays} gün`}
+                                    {diffDays === 0 ? "Bugün" : `${diffDays} gün`}
                                   </span>
                                 </div>
                               </div>
@@ -188,9 +161,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-6 min-h-[260px]">
-                <h3 className="text-2xl font-black mb-6">
-                  Son Eklenen Masraflar
-                </h3>
+                <h3 className="text-2xl font-black mb-6">Son Eklenen Masraflar</h3>
 
                 <div className="space-y-4">
                   {expenses.length === 0 && (
@@ -209,9 +180,7 @@ export default function DashboardPage() {
 
                         <div>
                           <div className="flex items-center gap-3 flex-wrap">
-                            <h4 className="text-xl font-black">
-                              {item.title}
-                            </h4>
+                            <h4 className="text-xl font-black">{item.title}</h4>
 
                             <span className="bg-blue-600 px-3 py-1 rounded-lg text-sm font-bold">
                               {item.category}

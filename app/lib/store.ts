@@ -1,12 +1,4 @@
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  updateDoc
-} from "firebase/firestore";
-
+import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
 export type PaymentHistory = {
@@ -32,13 +24,12 @@ const COLLECTION_NAME = "expenses";
 
 export async function getExpenses(): Promise<Expense[]> {
   const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
-
   const expenses: Expense[] = [];
 
   querySnapshot.forEach((docItem) => {
     expenses.push({
       id: docItem.id,
-      ...(docItem.data() as Omit<Expense, "id">)
+      ...(docItem.data() as Omit<Expense, "id">),
     });
   });
 
@@ -68,6 +59,6 @@ export async function updateExpenseInDB(expense: Expense) {
     monthlyPayment: expense.monthlyPayment,
     dueDate: expense.dueDate,
     note: expense.note,
-    paymentHistory: expense.paymentHistory || []
+    paymentHistory: expense.paymentHistory || [],
   });
 }

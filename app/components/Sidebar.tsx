@@ -10,10 +10,7 @@ type Props = {
   setMobileOpen: (value: boolean) => void;
 };
 
-export default function Sidebar({
-  mobileOpen,
-  setMobileOpen
-}: Props) {
+export default function Sidebar({ mobileOpen, setMobileOpen }: Props) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -21,7 +18,7 @@ export default function Sidebar({
     { name: "Dashboard", path: "/dashboard", icon: "🏠" },
     { name: "Masraflar", path: "/expenses", icon: "🧾" },
     { name: "Analiz", path: "/analysis", icon: "📈" },
-    { name: "Ödemeler", path: "/payments", icon: "📅" }
+    { name: "Ödemeler", path: "/payments", icon: "📅" },
   ];
 
   async function logout() {
@@ -51,11 +48,7 @@ export default function Sidebar({
           w-[300px] min-h-screen
           bg-[#061122] border-r border-slate-800
           p-7 transition-all duration-300
-          ${
-            mobileOpen
-              ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0"
-          }
+          ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         `}
       >
         <div className="flex items-center justify-between mb-12">
@@ -65,13 +58,8 @@ export default function Sidebar({
             </div>
 
             <div>
-              <h1 className="text-2xl font-black text-white">
-                WeddingPro
-              </h1>
-
-              <p className="text-slate-400 mt-1">
-                Finans Yönetimi
-              </p>
+              <h1 className="text-2xl font-black text-white">WeddingPro</h1>
+              <p className="text-slate-400 mt-1">Finans Yönetimi</p>
             </div>
           </div>
 
@@ -91,11 +79,7 @@ export default function Sidebar({
               onClick={() => setMobileOpen(false)}
               className={`
                 flex items-center gap-4 px-5 py-4 rounded-xl text-lg font-bold transition
-                ${
-                  pathname === menu.path
-                    ? "bg-blue-600 text-white"
-                    : "text-white hover:bg-slate-800"
-                }
+                ${pathname === menu.path ? "bg-blue-600 text-white" : "text-white hover:bg-slate-800"}
               `}
             >
               <span className="text-xl">{menu.icon}</span>
@@ -105,9 +89,7 @@ export default function Sidebar({
         </nav>
 
         <div className="mt-10">
-          <p className="text-slate-400 text-lg mb-4">
-            Hesap
-          </p>
+          <p className="text-slate-400 text-lg mb-4">Hesap</p>
 
           <button
             onClick={logout}
@@ -123,7 +105,6 @@ export default function Sidebar({
           </div>
 
           <p className="font-bold text-white">N</p>
-
           <span className="ml-auto text-slate-400">⌄</span>
         </div>
       </aside>

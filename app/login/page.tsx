@@ -28,9 +28,7 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen bg-[#020817] flex items-center justify-center p-6 text-white">
       <div className="w-full max-w-md bg-[#08172b] border border-slate-700 rounded-2xl p-8 shadow-2xl">
-        <h1 className="text-4xl font-black mb-3 text-center">
-          WeddingPro
-        </h1>
+        <h1 className="text-4xl font-black mb-3 text-center">WeddingPro</h1>
 
         <p className="text-slate-400 text-center mb-8">
           Evlilik finans hesabına giriş yap
@@ -58,8 +56,6 @@ export default function LoginPage() {
         >
           Giriş Yap
         </button>
-
-
       </div>
     </main>
   );

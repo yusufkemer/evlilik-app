@@ -18,15 +18,11 @@ body {
 }
 
 button,
-a {
-  cursor: pointer;
-}
+a { cursor: pointer; }
 
 input,
 select,
-textarea {
-  outline: none;
-}
+textarea { outline: none; }
 
 .page-shell {
   flex: 1;
@@ -49,12 +45,8 @@ textarea {
   font-size: 16px;
 }
 
-.input-style::placeholder {
-  color: #94a3b8;
-}
+.input-style::placeholder { color: #94a3b8; }
 
 @media (max-width: 1024px) {
-  .page-shell {
-    padding: 76px 18px 24px;
-  }
+  .page-shell { padding: 76px 18px 24px; }
 }
