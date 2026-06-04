@@ -43,7 +43,6 @@ export default function DashboardPage() {
     loadData();
 
     const savedTarget = localStorage.getItem("weddingTarget");
-
     if (savedTarget) {
       setWeddingTarget(Number(savedTarget));
     }
@@ -59,7 +58,6 @@ export default function DashboardPage() {
 
     setWeddingTarget(value);
     localStorage.setItem("weddingTarget", String(value));
-
     setTargetInput("");
     setTargetModalOpen(false);
   }
@@ -111,8 +109,7 @@ export default function DashboardPage() {
     const totals: Record<string, number> = {};
 
     expenses.forEach((item) => {
-      totals[item.category] =
-        (totals[item.category] || 0) + item.total;
+      totals[item.category] = (totals[item.category] || 0) + item.total;
     });
 
     return totals;
@@ -124,14 +121,12 @@ export default function DashboardPage() {
     expenses.forEach((expense) => {
       expense.paymentHistory?.forEach((payment) => {
         const month = payment.date.slice(3, 10);
-
         months[month] = (months[month] || 0) + payment.amount;
       });
     });
 
     return {
       labels: Object.keys(months),
-
       datasets: [
         {
           label: "Aylık Ödemeler",
@@ -151,29 +146,40 @@ export default function DashboardPage() {
     const dueDate = new Date(item.dueDate);
 
     const diffDays = Math.ceil(
-      (dueDate.getTime() - today.getTime()) /
-        (1000 * 60 * 60 * 24)
+      (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
     );
 
     return diffDays >= 0 && diffDays <= 7;
   });
 
+  const biggestExpense = [...expenses].sort(
+    (a, b) => b.total - a.total
+  )[0];
+
+  const nearestPayment = [...expenses]
+    .filter((item) => item.remaining > 0 && item.dueDate)
+    .sort(
+      (a, b) =>
+        new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+    )[0];
+
+  const averageMonthlyPayment =
+    expenses.length > 0
+      ? expenses.reduce((sum, item) => sum + item.monthlyPayment, 0) /
+        expenses.length
+      : 0;
+
   return (
     <AuthGuard>
       <main className="min-h-screen bg-[#020817] text-white overflow-x-hidden">
         <div className="flex min-h-screen">
-          <Sidebar
-            mobileOpen={mobileOpen}
-            setMobileOpen={setMobileOpen}
-          />
+          <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
 
           <section className="page-shell">
             <div className="page-inner">
               <div className="flex items-start justify-between mb-8">
                 <div>
-                  <h1 className="text-4xl font-black">
-                    Dashboard
-                  </h1>
+                  <h1 className="text-4xl font-black">Dashboard</h1>
 
                   <p className="text-slate-400 text-lg mt-2">
                     Genel finans görünümü
@@ -186,9 +192,7 @@ export default function DashboardPage() {
                   </div>
 
                   <div>
-                    <p className="text-slate-400 text-sm">
-                      Bugün
-                    </p>
+                    <p className="text-slate-400 text-sm">Bugün</p>
 
                     <p className="text-lg font-black">
                       {new Date().toLocaleDateString("tr-TR")}
@@ -196,6 +200,47 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
+
+              {upcomingPayments.length > 0 && (
+                <div className="bg-red-600/20 border border-red-500 rounded-2xl p-6 mb-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center text-2xl">
+                      ⚠️
+                    </div>
+
+                    <div>
+                      <h3 className="text-2xl font-black">
+                        Yaklaşan Ödemeler
+                      </h3>
+
+                      <p className="text-red-200">
+                        7 gün içinde {upcomingPayments.length} ödeme bulunuyor.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {upcomingPayments.slice(0, 3).map((item) => (
+                      <div
+                        key={item.id}
+                        className="bg-[#061122] border border-red-500/30 rounded-xl p-4 flex justify-between items-center gap-4"
+                      >
+                        <div>
+                          <p className="font-bold text-white">{item.title}</p>
+
+                          <p className="text-slate-400 text-sm">
+                            Son ödeme: {item.dueDate}
+                          </p>
+                        </div>
+
+                        <span className="text-red-400 font-black">
+                          {item.remaining.toLocaleString("tr-TR")} ₺
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <Card
@@ -244,9 +289,7 @@ export default function DashboardPage() {
               <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-6 mb-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 mb-5">
                   <div>
-                    <h3 className="text-2xl font-black">
-                      Ev Kurma Hedefi
-                    </h3>
+                    <h3 className="text-2xl font-black">Ev Kurma Hedefi</h3>
 
                     <p className="text-slate-400 mt-2">
                       Hedef: {weddingTarget.toLocaleString("tr-TR")} ₺
@@ -254,9 +297,7 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="text-left md:text-right">
-                    <p className="text-slate-400">
-                      Toplam Ödenen
-                    </p>
+                    <p className="text-slate-400">Toplam Ödenen</p>
 
                     <p className="text-3xl font-black text-green-400">
                       {totalPaid.toLocaleString("tr-TR")} ₺
@@ -265,13 +306,9 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="flex justify-between mb-3">
-                  <p className="text-slate-400">
-                    Hedef Tamamlanma
-                  </p>
+                  <p className="text-slate-400">Hedef Tamamlanma</p>
 
-                  <p className="font-black">
-                    %{targetPercent}
-                  </p>
+                  <p className="font-black">%{targetPercent}</p>
                 </div>
 
                 <div className="w-full bg-slate-800 h-4 rounded-full overflow-hidden">
@@ -296,6 +333,38 @@ export default function DashboardPage() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
+                <MiniCard
+                  title="🔥 En Büyük Masraf"
+                  main={biggestExpense?.title || "-"}
+                  sub={`${biggestExpense?.total?.toLocaleString("tr-TR") || 0} ₺`}
+                  color="text-red-400"
+                />
+
+                <MiniCard
+                  title="📅 En Yakın Ödeme"
+                  main={nearestPayment?.title || "-"}
+                  sub={nearestPayment?.dueDate || "-"}
+                  color="text-yellow-400"
+                />
+
+                <MiniCard
+                  title="✅ Tamamlanan"
+                  main={`${completedExpenses}`}
+                  sub="masraf tamamlandı"
+                  color="text-green-400"
+                />
+
+                <MiniCard
+                  title="📊 Ortalama Aylık Ödeme"
+                  main={`${averageMonthlyPayment.toLocaleString("tr-TR", {
+                    maximumFractionDigits: 0,
+                  })} ₺`}
+                  sub="ortalama"
+                  color="text-blue-400"
+                />
+              </div>
+
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
                 <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-6">
                   <h3 className="text-2xl font-black mb-5">
@@ -303,13 +372,9 @@ export default function DashboardPage() {
                   </h3>
 
                   <div className="flex justify-between mb-3">
-                    <p className="text-slate-400">
-                      Tamamlanma
-                    </p>
+                    <p className="text-slate-400">Tamamlanma</p>
 
-                    <p className="font-black">
-                      %{percent}
-                    </p>
+                    <p className="font-black">%{percent}</p>
                   </div>
 
                   <div className="w-full bg-slate-800 h-4 rounded-full overflow-hidden">
@@ -347,8 +412,7 @@ export default function DashboardPage() {
                           const dueDate = new Date(item.dueDate);
 
                           const diffDays = Math.ceil(
-                            (dueDate.getTime() -
-                              today.getTime()) /
+                            (dueDate.getTime() - today.getTime()) /
                               (1000 * 60 * 60 * 24)
                           );
 
@@ -365,10 +429,7 @@ export default function DashboardPage() {
 
                                   <p className="text-red-400 font-bold mt-1">
                                     Kalan:{" "}
-                                    {item.remaining.toLocaleString(
-                                      "tr-TR"
-                                    )}{" "}
-                                    ₺
+                                    {item.remaining.toLocaleString("tr-TR")} ₺
                                   </p>
 
                                   <p className="text-slate-400 text-sm mt-1">
@@ -407,7 +468,6 @@ export default function DashboardPage() {
                     data={monthlyData}
                     options={{
                       responsive: true,
-
                       plugins: {
                         legend: {
                           labels: {
@@ -415,23 +475,19 @@ export default function DashboardPage() {
                           },
                         },
                       },
-
                       scales: {
                         x: {
                           ticks: {
                             color: "#ffffff",
                           },
-
                           grid: {
                             color: "#1e293b",
                           },
                         },
-
                         y: {
                           ticks: {
                             color: "#ffffff",
                           },
-
                           grid: {
                             color: "#1e293b",
                           },
@@ -449,9 +505,7 @@ export default function DashboardPage() {
 
                 <div className="space-y-4">
                   {expenses.length === 0 && (
-                    <p className="text-slate-400">
-                      Henüz masraf kaydı yok.
-                    </p>
+                    <p className="text-slate-400">Henüz masraf kaydı yok.</p>
                   )}
 
                   {expenses.slice(0, 5).map((item) => (
@@ -476,8 +530,7 @@ export default function DashboardPage() {
                           </div>
 
                           <p className="text-slate-400 mt-2">
-                            Son ödeme:{" "}
-                            {item.dueDate || "Belirtilmedi"}
+                            Son ödeme: {item.dueDate || "Belirtilmedi"}
                           </p>
                         </div>
                       </div>
@@ -488,8 +541,7 @@ export default function DashboardPage() {
                         </p>
 
                         <p className="text-green-400 font-bold mt-2">
-                          Ödenen:{" "}
-                          {item.paid.toLocaleString("tr-TR")} ₺
+                          Ödenen: {item.paid.toLocaleString("tr-TR")} ₺
                         </p>
                       </div>
                     </div>
@@ -504,9 +556,7 @@ export default function DashboardPage() {
 
                 <div className="space-y-4">
                   {Object.entries(categoryTotals).length === 0 && (
-                    <p className="text-slate-400">
-                      Henüz kategori verisi yok.
-                    </p>
+                    <p className="text-slate-400">Henüz kategori verisi yok.</p>
                   )}
 
                   {Object.entries(categoryTotals).map(([name, total]) => (
@@ -519,9 +569,7 @@ export default function DashboardPage() {
                           {getCategoryIcon(name)}
                         </span>
 
-                        <span className="font-bold text-lg">
-                          {name}
-                        </span>
+                        <span className="font-bold text-lg">{name}</span>
                       </div>
 
                       <span className="text-blue-400 font-black text-xl">
@@ -598,14 +646,32 @@ function Card({
       </div>
 
       <div>
-        <p className="text-slate-400 font-bold">
-          {title}
-        </p>
+        <p className="text-slate-400 font-bold">{title}</p>
 
-        <h2 className={`text-3xl font-black mt-2 ${color}`}>
-          {value}
-        </h2>
+        <h2 className={`text-3xl font-black mt-2 ${color}`}>{value}</h2>
       </div>
+    </div>
+  );
+}
+
+function MiniCard({
+  title,
+  main,
+  sub,
+  color,
+}: {
+  title: string;
+  main: string;
+  sub: string;
+  color: string;
+}) {
+  return (
+    <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-6">
+      <p className="text-slate-400">{title}</p>
+
+      <h3 className={`text-xl font-black mt-3 ${color}`}>{main}</h3>
+
+      <p className="text-slate-400 mt-2">{sub}</p>
     </div>
   );
 }
@@ -614,22 +680,16 @@ function getCategoryIcon(category: string) {
   switch (category) {
     case "Mobilya":
       return "🛋️";
-
     case "Beyaz Eşya":
       return "🧊";
-
     case "Elektronik":
       return "💻";
-
     case "Düğün":
       return "💍";
-
     case "Takı":
       return "💎";
-
     case "Ev Tekstili":
       return "🛏️";
-
     default:
       return "📦";
   }
