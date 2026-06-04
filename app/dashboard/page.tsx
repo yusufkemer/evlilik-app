@@ -58,6 +58,17 @@ export default function DashboardPage() {
 
   const totalExpenseCount = expenses.length;
 
+  const categoryTotals = useMemo(() => {
+    const totals: Record<string, number> = {};
+
+    expenses.forEach((item) => {
+      totals[item.category] =
+        (totals[item.category] || 0) + item.total;
+    });
+
+    return totals;
+  }, [expenses]);
+
   const upcomingPayments = expenses.filter((item) => {
     if (!item.dueDate || item.remaining <= 0) return false;
 
@@ -65,7 +76,8 @@ export default function DashboardPage() {
     const dueDate = new Date(item.dueDate);
 
     const diffDays = Math.ceil(
-      (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      (dueDate.getTime() - today.getTime()) /
+        (1000 * 60 * 60 * 24)
     );
 
     return diffDays >= 0 && diffDays <= 7;
@@ -75,13 +87,18 @@ export default function DashboardPage() {
     <AuthGuard>
       <main className="min-h-screen bg-[#020817] text-white overflow-x-hidden">
         <div className="flex min-h-screen">
-          <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
+          <Sidebar
+            mobileOpen={mobileOpen}
+            setMobileOpen={setMobileOpen}
+          />
 
           <section className="page-shell">
             <div className="page-inner">
               <div className="flex items-start justify-between mb-8">
                 <div>
-                  <h1 className="text-4xl font-black">Dashboard</h1>
+                  <h1 className="text-4xl font-black">
+                    Dashboard
+                  </h1>
 
                   <p className="text-slate-400 text-lg mt-2">
                     Genel finans görünümü
@@ -94,7 +111,9 @@ export default function DashboardPage() {
                   </div>
 
                   <div>
-                    <p className="text-slate-400 text-sm">Bugün</p>
+                    <p className="text-slate-400 text-sm">
+                      Bugün
+                    </p>
 
                     <p className="text-lg font-black">
                       {new Date().toLocaleDateString("tr-TR")}
@@ -154,14 +173,21 @@ export default function DashboardPage() {
                   </h3>
 
                   <div className="flex justify-between mb-3">
-                    <p className="text-slate-400">Tamamlanma</p>
-                    <p className="font-black">%{percent}</p>
+                    <p className="text-slate-400">
+                      Tamamlanma
+                    </p>
+
+                    <p className="font-black">
+                      %{percent}
+                    </p>
                   </div>
 
                   <div className="w-full bg-slate-800 h-4 rounded-full overflow-hidden">
                     <div
                       className="bg-green-500 h-4 rounded-full"
-                      style={{ width: `${percent}%` }}
+                      style={{
+                        width: `${percent}%`,
+                      }}
                     />
                   </div>
 
@@ -191,7 +217,8 @@ export default function DashboardPage() {
                           const dueDate = new Date(item.dueDate);
 
                           const diffDays = Math.ceil(
-                            (dueDate.getTime() - today.getTime()) /
+                            (dueDate.getTime() -
+                              today.getTime()) /
                               (1000 * 60 * 60 * 24)
                           );
 
@@ -208,7 +235,10 @@ export default function DashboardPage() {
 
                                   <p className="text-red-400 font-bold mt-1">
                                     Kalan:{" "}
-                                    {item.remaining.toLocaleString("tr-TR")} ₺
+                                    {item.remaining.toLocaleString(
+                                      "tr-TR"
+                                    )}{" "}
+                                    ₺
                                   </p>
 
                                   <p className="text-slate-400 text-sm mt-1">
@@ -240,7 +270,9 @@ export default function DashboardPage() {
 
                 <div className="space-y-4">
                   {expenses.length === 0 && (
-                    <p className="text-slate-400">Henüz masraf kaydı yok.</p>
+                    <p className="text-slate-400">
+                      Henüz masraf kaydı yok.
+                    </p>
                   )}
 
                   {expenses.slice(0, 5).map((item) => (
@@ -265,7 +297,8 @@ export default function DashboardPage() {
                           </div>
 
                           <p className="text-slate-400 mt-2">
-                            Son ödeme: {item.dueDate || "Belirtilmedi"}
+                            Son ödeme:{" "}
+                            {item.dueDate || "Belirtilmedi"}
                           </p>
                         </div>
                       </div>
@@ -276,9 +309,45 @@ export default function DashboardPage() {
                         </p>
 
                         <p className="text-green-400 font-bold mt-2">
-                          Ödenen: {item.paid.toLocaleString("tr-TR")} ₺
+                          Ödenen:{" "}
+                          {item.paid.toLocaleString("tr-TR")} ₺
                         </p>
                       </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-6 mt-6">
+                <h3 className="text-2xl font-black mb-6">
+                  Kategori Dağılımı
+                </h3>
+
+                <div className="space-y-4">
+                  {Object.entries(categoryTotals).length === 0 && (
+                    <p className="text-slate-400">
+                      Henüz kategori verisi yok.
+                    </p>
+                  )}
+
+                  {Object.entries(categoryTotals).map(([name, total]) => (
+                    <div
+                      key={name}
+                      className="bg-[#061122] border border-slate-700 rounded-xl p-4 flex justify-between items-center gap-4"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">
+                          {getCategoryIcon(name)}
+                        </span>
+
+                        <span className="font-bold text-lg">
+                          {name}
+                        </span>
+                      </div>
+
+                      <span className="text-blue-400 font-black text-xl">
+                        {total.toLocaleString("tr-TR")} ₺
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -309,7 +378,9 @@ function Card({
       </div>
 
       <div>
-        <p className="text-slate-400 font-bold">{title}</p>
+        <p className="text-slate-400 font-bold">
+          {title}
+        </p>
 
         <h2 className={`text-3xl font-black mt-2 ${color}`}>
           {value}
@@ -317,4 +388,29 @@ function Card({
       </div>
     </div>
   );
+}
+
+function getCategoryIcon(category: string) {
+  switch (category) {
+    case "Mobilya":
+      return "🛋️";
+
+    case "Beyaz Eşya":
+      return "🧊";
+
+    case "Elektronik":
+      return "💻";
+
+    case "Düğün":
+      return "💍";
+
+    case "Takı":
+      return "💎";
+
+    case "Ev Tekstili":
+      return "🛏️";
+
+    default:
+      return "📦";
+  }
 }
