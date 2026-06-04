@@ -5,6 +5,7 @@ import AuthGuard from "../components/AuthGuard";
 import Sidebar from "../components/Sidebar";
 import { Expense, getExpenses } from "../lib/store";
 import { generatePdfReport } from "../lib/pdf";
+import { exportExpensesToExcel } from "../lib/excel";
 
 import {
   Chart as ChartJS,
@@ -195,7 +196,12 @@ export default function DashboardPage() {
                   >
                     PDF Rapor İndir
                   </button>
-
+                <button
+                    onClick={() => exportExpensesToExcel(expenses)}
+   className="bg-emerald-700 hover:bg-emerald-800 px-5 py-3 rounded-xl font-bold"
+>
+  Excel İndir
+</button>
                   <div className="hidden md:flex items-center gap-4 bg-[#08172b] border border-slate-700 rounded-2xl px-5 py-3">
                     <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-2xl">
                       📅
