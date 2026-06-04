@@ -28,9 +28,14 @@ ChartJS.register(
   Legend
 );
 
+type DashboardFilter = "all" | "paid" | "remaining" | "month";
+
 export default function DashboardPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const [dashboardFilter, setDashboardFilter] =
+    useState<DashboardFilter>("all");
 
   const [weddingTarget, setWeddingTarget] = useState(750000);
   const [targetModalOpen, setTargetModalOpen] = useState(false);
@@ -65,14 +70,51 @@ export default function DashboardPage() {
     setTargetModalOpen(false);
   }
 
+  const filteredDashboardExpenses = useMemo(() => {
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+
+    return expenses.filter((item) => {
+      if (dashboardFilter === "paid") {
+        return item.remaining <= 0;
+      }
+
+      if (dashboardFilter === "remaining") {
+        return item.remaining > 0;
+      }
+
+      if (dashboardFilter === "month") {
+        if (!item.dueDate || item.remaining <= 0) return false;
+
+        const dueDate = new Date(item.dueDate);
+
+        return (
+          dueDate.getMonth() === currentMonth &&
+          dueDate.getFullYear() === currentYear
+        );
+      }
+
+      return true;
+    });
+  }, [expenses, dashboardFilter]);
+
   const totalDebt = useMemo(
-    () => expenses.reduce((sum, item) => sum + item.total, 0),
-    [expenses]
+    () =>
+      filteredDashboardExpenses.reduce(
+        (sum, item) => sum + item.total,
+        0
+      ),
+    [filteredDashboardExpenses]
   );
 
   const totalPaid = useMemo(
-    () => expenses.reduce((sum, item) => sum + item.paid, 0),
-    [expenses]
+    () =>
+      filteredDashboardExpenses.reduce(
+        (sum, item) => sum + item.paid,
+        0
+      ),
+    [filteredDashboardExpenses]
   );
 
   const totalRemaining = totalDebt - totalPaid;
@@ -85,7 +127,7 @@ export default function DashboardPage() {
     const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
 
-    return expenses
+    return filteredDashboardExpenses
       .filter((item) => {
         if (!item.dueDate || item.remaining <= 0) return false;
 
@@ -97,31 +139,34 @@ export default function DashboardPage() {
         );
       })
       .reduce((sum, item) => sum + item.remaining, 0);
-  }, [expenses]);
+  }, [filteredDashboardExpenses]);
 
-  const completedExpenses = expenses.filter(
+  const completedExpenses = filteredDashboardExpenses.filter(
     (item) => item.remaining <= 0
   ).length;
 
-  const totalExpenseCount = expenses.length;
+  const totalExpenseCount = filteredDashboardExpenses.length;
 
   const targetPercent =
-    weddingTarget > 0 ? Math.round((totalPaid / weddingTarget) * 100) : 0;
+    weddingTarget > 0
+      ? Math.round((totalPaid / weddingTarget) * 100)
+      : 0;
 
   const categoryTotals = useMemo(() => {
     const totals: Record<string, number> = {};
 
-    expenses.forEach((item) => {
-      totals[item.category] = (totals[item.category] || 0) + item.total;
+    filteredDashboardExpenses.forEach((item) => {
+      totals[item.category] =
+        (totals[item.category] || 0) + item.total;
     });
 
     return totals;
-  }, [expenses]);
+  }, [filteredDashboardExpenses]);
 
   const monthlyData = useMemo(() => {
     const months: Record<string, number> = {};
 
-    expenses.forEach((expense) => {
+    filteredDashboardExpenses.forEach((expense) => {
       expense.paymentHistory?.forEach((payment) => {
         const month = payment.date.slice(3, 10);
         months[month] = (months[month] || 0) + payment.amount;
@@ -140,36 +185,40 @@ export default function DashboardPage() {
         },
       ],
     };
-  }, [expenses]);
+  }, [filteredDashboardExpenses]);
 
-  const upcomingPayments = expenses.filter((item) => {
+  const upcomingPayments = filteredDashboardExpenses.filter((item) => {
     if (!item.dueDate || item.remaining <= 0) return false;
 
     const today = new Date();
     const dueDate = new Date(item.dueDate);
 
     const diffDays = Math.ceil(
-      (dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+      (dueDate.getTime() - today.getTime()) /
+        (1000 * 60 * 60 * 24)
     );
 
     return diffDays >= 0 && diffDays <= 7;
   });
 
-  const biggestExpense = [...expenses].sort(
+  const biggestExpense = [...filteredDashboardExpenses].sort(
     (a, b) => b.total - a.total
   )[0];
 
-  const nearestPayment = [...expenses]
+  const nearestPayment = [...filteredDashboardExpenses]
     .filter((item) => item.remaining > 0 && item.dueDate)
     .sort(
       (a, b) =>
-        new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+        new Date(a.dueDate).getTime() -
+        new Date(b.dueDate).getTime()
     )[0];
 
   const averageMonthlyPayment =
-    expenses.length > 0
-      ? expenses.reduce((sum, item) => sum + item.monthlyPayment, 0) /
-        expenses.length
+    filteredDashboardExpenses.length > 0
+      ? filteredDashboardExpenses.reduce(
+          (sum, item) => sum + item.monthlyPayment,
+          0
+        ) / filteredDashboardExpenses.length
       : 0;
 
   return (
@@ -180,7 +229,7 @@ export default function DashboardPage() {
 
           <section className="page-shell">
             <div className="page-inner">
-              <div className="flex items-start justify-between mb-8">
+              <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-5 mb-8">
                 <div>
                   <h1 className="text-4xl font-black">Dashboard</h1>
 
@@ -189,19 +238,25 @@ export default function DashboardPage() {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   <button
-                    onClick={() => generatePdfReport(expenses)}
+                    onClick={() =>
+                      generatePdfReport(filteredDashboardExpenses)
+                    }
                     className="bg-green-600 hover:bg-green-700 px-5 py-3 rounded-xl font-bold"
                   >
                     PDF Rapor İndir
                   </button>
-                <button
-                    onClick={() => exportExpensesToExcel(expenses)}
-   className="bg-emerald-700 hover:bg-emerald-800 px-5 py-3 rounded-xl font-bold"
->
-  Excel İndir
-</button>
+
+                  <button
+                    onClick={() =>
+                      exportExpensesToExcel(filteredDashboardExpenses)
+                    }
+                    className="bg-emerald-700 hover:bg-emerald-800 px-5 py-3 rounded-xl font-bold"
+                  >
+                    Excel İndir
+                  </button>
+
                   <div className="hidden md:flex items-center gap-4 bg-[#08172b] border border-slate-700 rounded-2xl px-5 py-3">
                     <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-2xl">
                       📅
@@ -216,6 +271,52 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-4 mb-6 flex gap-3 flex-wrap">
+                <button
+                  onClick={() => setDashboardFilter("all")}
+                  className={`px-5 py-3 rounded-xl font-bold ${
+                    dashboardFilter === "all"
+                      ? "bg-blue-600"
+                      : "bg-[#061122]"
+                  }`}
+                >
+                  Tümü
+                </button>
+
+                <button
+                  onClick={() => setDashboardFilter("paid")}
+                  className={`px-5 py-3 rounded-xl font-bold ${
+                    dashboardFilter === "paid"
+                      ? "bg-green-600"
+                      : "bg-[#061122]"
+                  }`}
+                >
+                  Ödenenler
+                </button>
+
+                <button
+                  onClick={() => setDashboardFilter("remaining")}
+                  className={`px-5 py-3 rounded-xl font-bold ${
+                    dashboardFilter === "remaining"
+                      ? "bg-red-600"
+                      : "bg-[#061122]"
+                  }`}
+                >
+                  Borcu Kalanlar
+                </button>
+
+                <button
+                  onClick={() => setDashboardFilter("month")}
+                  className={`px-5 py-3 rounded-xl font-bold ${
+                    dashboardFilter === "month"
+                      ? "bg-yellow-600"
+                      : "bg-[#061122]"
+                  }`}
+                >
+                  Bu Ay Ödenecekler
+                </button>
               </div>
 
               {upcomingPayments.length > 0 && (
@@ -306,7 +407,9 @@ export default function DashboardPage() {
               <div className="bg-[#08172b] border border-slate-700 rounded-2xl p-6 mb-6">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 mb-5">
                   <div>
-                    <h3 className="text-2xl font-black">Ev Kurma Hedefi</h3>
+                    <h3 className="text-2xl font-black">
+                      Ev Kurma Hedefi
+                    </h3>
 
                     <p className="text-slate-400 mt-2">
                       Hedef: {weddingTarget.toLocaleString("tr-TR")} ₺
@@ -354,7 +457,9 @@ export default function DashboardPage() {
                 <MiniCard
                   title="🔥 En Büyük Masraf"
                   main={biggestExpense?.title || "-"}
-                  sub={`${biggestExpense?.total?.toLocaleString("tr-TR") || 0} ₺`}
+                  sub={`${
+                    biggestExpense?.total?.toLocaleString("tr-TR") || 0
+                  } ₺`}
                   color="text-red-400"
                 />
 
@@ -404,7 +509,7 @@ export default function DashboardPage() {
                   </div>
 
                   <p className="text-slate-400 mt-5">
-                    Toplam borcun %{percent} kadarı ödenmiş durumda.
+                    Seçili filtredeki toplam borcun %{percent} kadarı ödenmiş durumda.
                   </p>
                 </div>
 
@@ -420,7 +525,7 @@ export default function DashboardPage() {
 
                     {upcomingPayments.length === 0 ? (
                       <p className="text-slate-400">
-                        Önümüzdeki 7 gün içinde ödeme görünmüyor.
+                        Seçili filtrede 7 gün içinde ödeme görünmüyor.
                       </p>
                     ) : (
                       <div className="space-y-3">
@@ -478,7 +583,7 @@ export default function DashboardPage() {
 
                 {monthlyData.labels.length === 0 ? (
                   <p className="text-slate-400">
-                    Henüz grafik oluşturacak ödeme verisi yok.
+                    Seçili filtrede grafik oluşturacak ödeme verisi yok.
                   </p>
                 ) : (
                   <Line
@@ -521,11 +626,13 @@ export default function DashboardPage() {
                 </h3>
 
                 <div className="space-y-4">
-                  {expenses.length === 0 && (
-                    <p className="text-slate-400">Henüz masraf kaydı yok.</p>
+                  {filteredDashboardExpenses.length === 0 && (
+                    <p className="text-slate-400">
+                      Seçili filtreye uygun masraf yok.
+                    </p>
                   )}
 
-                  {expenses.slice(0, 5).map((item) => (
+                  {filteredDashboardExpenses.slice(0, 5).map((item) => (
                     <div
                       key={item.id}
                       className="bg-[#061122] border border-slate-700 rounded-2xl p-5 flex flex-col md:flex-row justify-between gap-5"
