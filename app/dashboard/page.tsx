@@ -30,6 +30,10 @@ export default function DashboardPage() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const [weddingTarget, setWeddingTarget] = useState(750000);
+  const [targetModalOpen, setTargetModalOpen] = useState(false);
+  const [targetInput, setTargetInput] = useState("");
+
   useEffect(() => {
     async function loadData() {
       const data = await getExpenses();
@@ -37,7 +41,28 @@ export default function DashboardPage() {
     }
 
     loadData();
+
+    const savedTarget = localStorage.getItem("weddingTarget");
+
+    if (savedTarget) {
+      setWeddingTarget(Number(savedTarget));
+    }
   }, []);
+
+  function saveTarget() {
+    const value = Number(targetInput);
+
+    if (!value || value <= 0) {
+      alert("Geçerli bir hedef tutarı gir.");
+      return;
+    }
+
+    setWeddingTarget(value);
+    localStorage.setItem("weddingTarget", String(value));
+
+    setTargetInput("");
+    setTargetModalOpen(false);
+  }
 
   const totalDebt = useMemo(
     () => expenses.reduce((sum, item) => sum + item.total, 0),
@@ -78,8 +103,6 @@ export default function DashboardPage() {
   ).length;
 
   const totalExpenseCount = expenses.length;
-
-  const weddingTarget = 750000;
 
   const targetPercent =
     weddingTarget > 0 ? Math.round((totalPaid / weddingTarget) * 100) : 0;
@@ -258,6 +281,18 @@ export default function DashboardPage() {
                       width: `${Math.min(targetPercent, 100)}%`,
                     }}
                   />
+                </div>
+
+                <div className="flex justify-end mt-5">
+                  <button
+                    onClick={() => {
+                      setTargetInput(String(weddingTarget));
+                      setTargetModalOpen(true);
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl font-bold"
+                  >
+                    Hedefi Düzenle
+                  </button>
                 </div>
               </div>
 
@@ -496,6 +531,47 @@ export default function DashboardPage() {
                   ))}
                 </div>
               </div>
+
+              {targetModalOpen && (
+                <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-5">
+                  <div className="w-full max-w-md bg-[#08172b] border border-slate-700 rounded-2xl p-6">
+                    <h3 className="text-3xl font-black mb-3">
+                      Hedefi Düzenle
+                    </h3>
+
+                    <p className="text-slate-400 mb-6">
+                      Yeni ev kurma hedefini gir.
+                    </p>
+
+                    <input
+                      type="number"
+                      value={targetInput}
+                      onChange={(e) => setTargetInput(e.target.value)}
+                      placeholder="Hedef tutar"
+                      className="input-style"
+                    />
+
+                    <div className="flex gap-3 mt-6">
+                      <button
+                        onClick={saveTarget}
+                        className="bg-green-600 px-8 py-4 rounded-xl font-black"
+                      >
+                        Kaydet
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setTargetModalOpen(false);
+                          setTargetInput("");
+                        }}
+                        className="bg-red-600 px-8 py-4 rounded-xl font-black"
+                      >
+                        İptal
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </section>
         </div>
